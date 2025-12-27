@@ -11,7 +11,8 @@ CHROUT      = $FFD2
 
 *           = $0061                     ; reserve some zero page locations
 strlen      .byte ?                     ; max input length for readln
-strbase     .word ?                     ; points to storage for println or readln
+strbase     .word ?                     ; string base address for println
+                                        ; or readln
 savey       .byte ?                     ; temporary storage for y register
 
 ; wrapper for xprintln function
@@ -77,13 +78,15 @@ top         jsr SCNKEY                  ; scan keyboard
             beq top                     ; character was also a space
 output      jsr CHROUT                  ; print character to screen
             cmp #13                     ; check for EOL
-            beq end                     ; if we found EOL we're done reading input
+            beq end                     ; if we found EOL we're done reading
+                                        ; input
             sta lastchar
             ldy savey
             sta (strbase),y             ; save character to variable
             iny
             sty savey
-            cpy strlen                  ; check length of response against max length
+            cpy strlen                  ; check length of response against
+                                        ; max length
             beq limit                   ; exit if we've hit the limit
             jmp top                     ; otherwise continue reading characters
 
