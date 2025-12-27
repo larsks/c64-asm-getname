@@ -6,7 +6,6 @@ CHROUT      = $FFD2
 strlen      .byte ?                     ; max input length for readln
 strbase     .word ?                     ; points to storage for println or readln
 savey       .byte ?                     ; temporary storage for y register
-lastchar    .byte ?                     ; last character read
 
 ; wrapper for xprintln function
 println     .macro addr
@@ -42,12 +41,12 @@ readln      .macro addr, maxlen
 
 ; main program starts here
 main        #println name_prompt        ; print prompt for name
-            #readln name1, 20           ; read response
+            #readln corp_name, 20       ; read response
             #println num_prompt         ; print prompt for registration number
-            #readln name2, 20           ; read response
+            #readln reg_number, 20      ; read response
             #println name_conf          ; print confirmation prompt
-            #println name1              ; print name response
-            #println name2              ; print number response
+            #println corp_name          ; print name response
+            #println reg_number         ; print number response
 
             ; return to BASIC
             rts
@@ -78,7 +77,11 @@ output      jsr CHROUT                  ; print character to screen
 limit       lda #13                     ; if we exit due to length, print a
             jsr CHROUT                  ; carriage return
 
-end         rts
+end         ldy savey                   ; add null terminator to string
+            lda #0
+            sta (strbase),y
+
+            rts
             .pend
 
 xprintln    .proc
@@ -96,8 +99,9 @@ end         lda #$0d                    ; print carriage return
             .pend
 
 ; variable storage
-name1       .fill 21, 0
-name2       .fill 21, 0
+corp_name   .fill 21, 0
+reg_number  .fill 21, 0
 name_prompt .null "what is the name of your corporation?"
 num_prompt  .null "new astro mining corp reg. number?"
 name_conf   .null "you typed:"
+lastchar    .byte ?                     ; last character read
