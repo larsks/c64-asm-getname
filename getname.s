@@ -1,3 +1,10 @@
+; getname.s
+; by Lars Kellogg-Stedman <lars@oddbit.com>
+;
+; An experiment in reading user input
+; and simplifying code through the use
+; of macros.
+
 SCNKEY      = $FF9F
 GETIN       = $FFE4
 CHROUT      = $FFD2
@@ -27,8 +34,10 @@ readln      .macro addr, maxlen
             jsr xreadln                 ; and call xreadln
             .endm
 
-; BASIC bootstrap. This is a small BASIC program that will call `sys $c000`
-; (aka `sys 49152`). This allows us to run this program with vice by just
+; BASIC bootstrap. This is a small BASIC
+; program that will call `sys $c000`
+; (aka `sys 49152`). This allows us to
+; run this program with vice by just
 ; running `x64sc ./a.out`, for example.
 *           = $0801
             .word $080c
@@ -51,6 +60,10 @@ main        #println name_prompt        ; print prompt for name
             ; return to BASIC
             rts
 
+; expects the max length in variable
+; 'strlen' and stores the input into the
+; memory location pointed to by
+; 'strbase'.
 xreadln     .proc
             lda #0
             sta savey
@@ -84,6 +97,9 @@ end         ldy savey                   ; add null terminator to string
             rts
             .pend
 
+; prints the null terminated string
+; whose address is stored in variable
+; 'strbase'.
 xprintln    .proc
             ldy #0
 top         lda (strbase),y             ; load next character to print
