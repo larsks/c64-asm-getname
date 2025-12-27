@@ -6,6 +6,7 @@ CHROUT      = $FFD2
 strlen      .byte ?                     ; max input length for readln
 strbase     .word ?                     ; points to storage for println or readln
 savey       .byte ?                     ; temporary storage for y register
+lastchar    .byte ?                     ; last character read
 
 ; wrapper for xprintln function
 println     .macro addr
@@ -54,12 +55,18 @@ main        #println name_prompt        ; print prompt for name
 xreadln     .proc
             lda #0
             sta savey
+            sta lastchar
 top         jsr SCNKEY                  ; scan keyboard
             jsr GETIN                   ; read key into a
             beq top                     ; loop if nothing was pressed
-            jsr CHROUT                  ; print character to screen
+            cmp #$20                    ; is this a space character?
+            bne output                  ; if not process it normally
+            cmp lastchar                ; otherwise skip it if the last
+            beq top                     ; character was also a space
+output      jsr CHROUT                  ; print character to screen
             cmp #13                     ; check for EOL
             beq end                     ; if we found EOL we're done reading input
+            sta lastchar
             ldy savey
             sta (strbase),y             ; save character to variable
             iny
